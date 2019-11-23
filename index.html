@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Translations</title>
+	<script type="text/javascript" src="./vue.min.js"></script>
+	<style type="text/css">
+		.is-fullwidth {
+			width: 100%;
+		}
+
+		.flex {
+			display: flex;
+			justify-content: space-around;
+			align-items: center;
+		}
+		.is-rtl {
+			text-align: right;
+			direction: rtl;
+		}
+	</style>
+</head>
+<body>
+	<div id="app" style="width: 100vw;">
+		<div class="is-fullwidth flex">
+			<div style="display: inline-block;">
+				<h1>Translations</h1>
+			</div>
+			<div style="display: inline-block;">
+				<button id="add-lang" @click="addLanguage">add language</button>
+			</div>
+		</div>
+
+		<hr>
+
+		<table class="is-fullwidth">
+			<thead>
+				<tr>
+					<th style="width: 300px;">key</th>
+					<th v-for="lang in languages">
+					{{ lang }}
+					<button @click="exportLangMessages(lang)">&uarr;</button>					
+					<button @click="promptLangMessages(lang)">&darr;</button>
+				</th>
+			</tr>		
+		</thead>
+		<tbody>
+			<tr v-for="(message, key) in messages">
+				<td style="width: 300px;">{{ key }}</td>
+				<td v-for="lang in languages">
+				<input 
+					class="{'is-rtl': lang === 'AR'}"
+					v-model="message[lang]" class="is-fullwidth">
+			</td>
+		</tr>
+	</tbody>
+</table>
+<hr>
+<h3>Clipboard</h3>
+<input :value="clipboard" id="for-copy">
+</div>
+
+<script type="text/javascript">
+	var app = new Vue({
+		el: '#app',
+		data () {
+			return {
+				jsons: {},
+				messages: {},
+				languages: ['EN', 'AR'],
+				clipboard: ''
+			}
+		},
+		methods: {
+			exportLangMessages (lang) {
+				let acc = {}
+				for (let k in this.messages) {
+					if ((this.messages[k] || {})[lang]) {
+						acc[k] = this.messages[k][lang]
+					}
+				}
+				this.clipboard = JSON.stringify(acc);
+
+				document.execCommand("copy");
+
+				/* Get the text field */
+				var copyText = document.getElementById("for-copy");
+
+				/* Select the text field */
+				copyText.select();
+				copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+				/* Copy the text inside the text field */
+				document.execCommand("copy");
+
+				/* Alert the copied text */
+				alert("messages copied for lang " + lang);
+			},
+			promptLangMessages (lang) {
+				let json = prompt('insert messages as JSON for ' + lang);
+				var lMessages = JSON.parse(json);
+
+				for (let k in lMessages) {
+					this.messages[k] = this.messages[k] || {}
+					this.messages[k][lang] = lMessages[k]
+				}
+				this.$forceUpdate()
+			},
+			addLanguage () {
+				let newLang = prompt('insert language code')
+				if (!newLang) {
+					return
+				}
+				this.languages.push(newLang.toUpperCase())
+			}
+		}
+	})
+</script>
+</body>
+</html>

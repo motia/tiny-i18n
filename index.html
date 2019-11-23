@@ -8,7 +8,11 @@
 			width: 100%;
 		}
 
-		.flex {
+		.is-inline-block {
+			display: inline-block;
+		}
+
+		.is-flex {
 			display: flex;
 			justify-content: space-around;
 			align-items: center;
@@ -21,7 +25,7 @@
 </head>
 <body>
 	<div id="app" style="width: 100vw;">
-		<div class="is-fullwidth flex">
+		<div class="is-fullwidth is-flex">
 			<div style="display: inline-block;">
 				<h1>Translations</h1>
 			</div>
@@ -52,6 +56,19 @@
 					v-model="message[lang]" class="is-fullwidth">
 			</td>
 		</tr>
+		<tr style="background-color: red">
+			<td>
+				<input placeholder="new translation entry" type="text" v-model="newItem.key" class="is-fullwidth is-inline-block">
+			</td>
+			<td v-for="lang in languages">
+				<input type="text" v-model="newItem[lang]" class="is-fullwidth">
+			</td>
+		</tr>
+		<tr style="background-color: red">
+			<td style="text-align: center" :colspan="languages.length + 1">
+				<button class="is-fullwidth" :disabled="!newItem.key" @click="newTranslation">Add Key</button>
+			</td>
+		</tr>
 	</tbody>
 </table>
 <hr>
@@ -64,13 +81,20 @@
 		el: '#app',
 		data () {
 			return {
-				jsons: {},
+				newItem: {key: ''},
 				messages: {},
 				languages: ['EN', 'AR'],
 				clipboard: ''
 			}
 		},
 		methods: {
+			newTranslation () {
+				if (this.newItem.key) {
+					this.messages[this.newItem.key] = this.newItem
+					delete this.messages[this.newItem.key].key
+				}
+				this.newItem = {}
+			},
 			exportLangMessages (lang) {
 				let acc = {}
 				for (let k in this.messages) {
